@@ -242,13 +242,14 @@ for lli in range(len(test_x)):
 	test_x_AA[lli]=(1E+4)*test_x[lli]
 
 #Read the file that contains the PAH template (M17) + hot NIR continuum
+#If this fails, run convert_PAH.py to get normalized, flambda template
 print('Getting PAH + NIR template...')
 lampah=[]; l_lambda_PAH=[]
-f_pahs_nir=open('pahs_nir.dat','r')
+f_pahs_nir=open('pahs_nir_fl_norm.dat','r')
 ff_pahs_nir=f_pahs_nir.readlines()
 for i in range(len(ff_pahs_nir)):
 	temp_pahs=ff_pahs_nir[i].split()
-	lampah.append((1E-4)*float(temp_pahs[0])) #cm
+	lampah.append(float(temp_pahs[0])) #cm
 	l_lambda_PAH.append(float(temp_pahs[1]))
 #Interpolate to test_x_cm
 l_lambda_PAH_interp = np.interp(test_x_cm, lampah, l_lambda_PAH)	
@@ -256,13 +257,6 @@ l_lambda_PAH_interp = np.interp(test_x_cm, lampah, l_lambda_PAH)
 for i in range(len(test_x_cm)):
 	if test_x_cm[i]<min(lampah) or test_x_cm[i]>max(lampah):
 		l_lambda_PAH_interp[i]=0.	
-#Convert from fnu to flambda
-for mbbi in range(len(test_x_cm)):
-	l_lambda_PAH_interp[mbbi]*=(cspl/(test_x_cm[mbbi]**2)) * (1E-10)
-#Normalize PAH template
-norm_pah=np.trapz(l_lambda_PAH_interp, test_x_cm)
-for i in range(len(test_x_cm)):
-	l_lambda_PAH_interp[i]/=norm_pah
 
 #Get stellar models
 print('Getting young stellar templates (1/2)...')
