@@ -1,7 +1,7 @@
 '''
 cd /Users/garethjones/Desktop/BEAGLE_FIR-main
 conda activate py39
-python FullRadioFIR_MAGPHYS_PMN.py 
+python FullRadioFIR_MAGPHYS_PMN_NOV16.py 
 '''
 
 import numpy as np
@@ -163,8 +163,8 @@ def Full_SED(test_x_cm, Param_vals):
 			tempdel = abs(test_x_cm[itot]-test_x_cm[itot-1])
 		young_atten_y[itot] = young_unatten_y[itot] * np.exp(-1. * taubc) * np.exp(-1. * tauism)
 		old_atten_y[itot] = old_unatten_y[itot] * np.exp(-1. * tauism)
-		L_d_BC_tot+=(1.-np.exp(-1*taubc))*young_unatten_y[itot]*tempdel#*(1E+8)
-		L_d_ISM_tot+=(1.-np.exp(-1*tauism)) * (old_unatten_y[itot] + np.exp(-1*taubc)*young_unatten_y[itot])*tempdel#*(1E+8)
+		L_d_BC_tot+=(1.-np.exp(-1*taubc))*young_unatten_y[itot]*tempdel
+		L_d_ISM_tot+=(1.-np.exp(-1*tauism)) * (old_unatten_y[itot] + np.exp(-1*taubc)*young_unatten_y[itot])*tempdel
 	LdTot = L_d_BC_tot+L_d_ISM_tot
 	f_mu = L_d_ISM_tot/LdTot
 
@@ -362,8 +362,21 @@ else:
 	Best_Values=[]
 	for bi in range(len(Parameter)):
 		Best_Values.append(Parameter[bi]['val0'])
-	print(Best_Values)
+	print('Best values:',Best_Values)
 	[BC_PAH, BC_MIR, BC_W, ISM_PAH, ISM_MIR, ISM_W, ISM_C, Young_Stellar, Old_Stellar, Young_Stellar_unatten, Old_Stellar_unatten, full_sed] = Full_SED(test_x_cm,Best_Values)
+
+#Write out best-fit components as text files:
+print('Writing out best fits as text files...')
+output_folder = 'TEMP_OUTPUTS/'
+output_names = ['BC_PAH', 'BC_MIR', 'BC_W', 'ISM_PAH', 'ISM_MIR', 'ISM_W', 'ISM_C', 'Young_Stellar', 'Old_Stellar', 'Young_Stellar_unatten', 'Old_Stellar_unatten', 'full_sed']
+output_list = [BC_PAH, BC_MIR, BC_W, ISM_PAH, ISM_MIR, ISM_W, ISM_C, Young_Stellar, Old_Stellar, Young_Stellar_unatten, Old_Stellar_unatten, full_sed]
+for compi in range(len(output_names)):
+	f=open(output_folder+output_names[compi]+'.txt','w');f.close()
+	f=open(output_folder+output_names[compi]+'.txt','w')
+	f.write('Wavelength_AA Amp \n')
+	for compj in range(len(BC_PAH)):
+		f.write(str(test_x_AA[compj])+' '+str(output_list[compi][compj])+' \n')
+	f.close()
 
 
 fig = plt.figure(figsize=(8,7))
@@ -382,8 +395,8 @@ ax.plot(test_x_um, BC_W, label='BC Warm',c=colors[2],linestyle='dashed')
 ax.plot(test_x_um, Young_Stellar, label='Young Stellar [atten]',c=colors[1],linestyle='-')
 ax.plot(test_x_um, Old_Stellar, label='Old Stellar [atten]',c=colors[2],linestyle='-')
 
-#ax.plot(test_x_um, Young_Stellar_unatten, label='Young Stellar [unatten]',c=colors[1],linestyle='dotted')
-#ax.plot(test_x_um, Old_Stellar_unatten, label='Old Stellar [unatten]',c=colors[2],linestyle='dotted')
+ax.plot(test_x_um, Young_Stellar_unatten, label='Young Stellar [unatten]',c=colors[1],linestyle='dotted')
+ax.plot(test_x_um, Old_Stellar_unatten, label='Old Stellar [unatten]',c=colors[2],linestyle='dotted')
 
 ax.plot(test_x_um, full_sed, c='k', label='Full Model',lw=2)
 
